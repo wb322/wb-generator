@@ -1,5 +1,6 @@
 package com.github.wb322.controller;
 
+import cn.hutool.core.util.ArrayUtil;
 import com.github.wb322.entity.Template;
 import com.github.wb322.tools.Result;
 import com.github.wb322.tools.TemplateUtil;
@@ -39,6 +40,12 @@ public class TemplateController {
             return new Result (1,"添加出错",null);
         }
     }
+    @PostMapping("/addOrCopy")
+    public Result addOrCopy(String url){
+        url = TemplateUtil.addOrCopy(url);
+        List<Template> detail = TemplateUtil.detail (url);
+        return new Result (0,"",detail);
+    }
     @PutMapping
     public Result rename(String url,String newName){
         boolean b = TemplateUtil.rename (url, newName);
@@ -55,6 +62,20 @@ public class TemplateController {
             return new Result (0,"",null);
         }else{
             return new Result (1,"删除文件出错",null);
+        }
+    }
+    @PostMapping("/drop")
+    public Result drop(String[] source,String target,String type,boolean isCopy){
+        boolean b = false;
+        if (ArrayUtil.isNotEmpty (source)){
+            for (String s : source) {
+                b = TemplateUtil.drop (s,target,type,isCopy);
+            }
+        }
+        if (b){
+            return new Result (0,"",null);
+        }else{
+            return new Result (1,"移动文件出错",null);
         }
     }
 }

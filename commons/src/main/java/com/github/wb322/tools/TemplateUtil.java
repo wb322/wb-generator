@@ -1,6 +1,6 @@
 package com.github.wb322.tools;
 
-import cn.hutool.core.io.FileTypeUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.util.RuntimeUtil;
@@ -8,9 +8,9 @@ import com.github.wb322.entity.Strategy;
 import com.github.wb322.entity.Template;
 import org.junit.Test;
 
-import java.io.*;
-import java.nio.file.NoSuchFileException;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -94,7 +94,7 @@ public class TemplateUtil {
             if (i != -1){
                 type = url.substring (i);
             }
-            if (".sh".equals (type) || ".bat".equals (type)){
+            if (".sh".equals (type) || ".bat".equals (type) || ".js".equals (type)){
                 RuntimeUtil.exec ("cmd /c start notepad " +  url);
             }else if(".exe".equals (type)){
             }else{
@@ -139,7 +139,7 @@ public class TemplateUtil {
     }
 
     /**
-     * 添加文件或文件夹
+     * 添加文件或文件夹,已存在则不创建
      * @param type 0:文件夹,1:文件
      * @param url
      * @return
@@ -147,14 +147,71 @@ public class TemplateUtil {
     public static boolean add(Integer type, String url) {
         boolean b = false;
         try {
+            File file = new File (Strategy.templatesPath + url);
             if (type == 0){
-                File file = new File (Strategy.templatesPath + url);
-                file.mkdirs ();
-                b = true;
+                if (!file.exists ()){
+                    file.mkdirs ();
+                    b = true;
+                }
             }else{
-                FileUtil.touch (Strategy.templatesPath + url);
-                b = true;
+                if (!file.exists ()){
+                    FileUtil.touch (Strategy.templatesPath + url);
+                    b = true;
+                }
             }
+        } catch (IORuntimeException e) {
+            e.printStackTrace ();
+        }
+        return b;
+    }
+
+    /**
+     * 创建文件夹,已存在就复制并在名称上加时间戳
+     * @param url
+     * @return
+     */
+    public static String addOrCopy(String url) {
+        try {
+            File file = new File (Strategy.templatesPath + url);
+            if (!file.exists ()){
+                file.mkdirs ();
+            }else{
+                url = url + DateUtil.format (new Date (),"yyyyMMddHHmmss");
+                FileUtil.copyContent (file, new File (Strategy.templatesPath + url), true);
+            }
+        } catch (Exception e) {
+            e.printStackTrace ();
+        }
+        return url;
+    }
+
+    /**
+     * 复制文件
+     * @param source
+     * @param target
+     * @param type inner:复制到tartget内,其它:复制到tartget同级目录
+     * @param isCopy 是否复制
+     * @return
+     */
+    public static boolean drop(String source, String target, String type, boolean isCopy) {
+        boolean b = false;
+        try {
+            File src = new File (Strategy.templatesPath + source);
+            File dest = new File (Strategy.templatesPath + target);
+            if ("inner".equals (type)){
+                if (isCopy){
+                    FileUtil.copy (src,dest, false);
+                }else{
+                    FileUtil.move (src,dest, false);
+                }
+            }else{
+                if (isCopy){
+                    FileUtil.copy (src,dest.getParentFile (), false);
+                }else{
+                    FileUtil.move (src,dest.getParentFile (), false);
+                }
+            }
+            b = true;
         } catch (IORuntimeException e) {
             e.printStackTrace ();
         }
