@@ -9,7 +9,21 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>com.github.wb322</groupId>
     <artifactId>commons</artifactId>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.17</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+    </dependencies>
 
 
 </project>
