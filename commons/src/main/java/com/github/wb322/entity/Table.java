@@ -119,5 +119,10 @@ public class Table {
     public void setColumns(List<TableColumn> columns) {
         this.columns = columns;
     }
+
+    public Table(String name, String camel_name) {
+        this.name = name;
+        this.camel_name = camel_name;
+    }
 }
 

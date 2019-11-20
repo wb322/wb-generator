@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>生成</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script charset="utf-8" src="/layui/layui.js"></script>
+
+    <script charset="utf-8" src="/jquery.min.js"></script>
+    <script charset="utf-8" src="/myFun.js"></script>
+</head>
+<body>
+<div class="layui-form" lay-filter="form-add-edit" id="form-add-edit" style="padding: 20px 50px 0 0;">
+    <div class="layui-form-item">
+        <label class="layui-form-label">模板</label>
+        <div class="layui-input-block">
+            <select name="templates" id="templates" class="layui-select">
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">模板</label>
+        <div class="layui-input-block">
+            <select name="templates" id="" class="layui-select">
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label"></label>
+        <div class="layui-input-block">
+            <button class="layui-btn">生成</button>
+        </div>
+
+    </div>
+</div>
+</div>
+</body>
+</html>
+<script>
+    layui.use(['layer', 'form'], function () {
+        var form = layui.form;
+        //查询所有模板
+        wb.get("/templates", null, function (d) {
+            d.data.forEach(function (k) {
+                $("#templates").append("<option value='" + k.name + "'>" + k.name + "</option>");
+                form.render();
+            });
+        });
+    });
+</script>

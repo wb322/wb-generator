@@ -3,7 +3,9 @@ package com.github.wb322.tools;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IORuntimeException;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RuntimeUtil;
+import cn.hutool.setting.Setting;
 import com.github.wb322.entity.Strategy;
 import com.github.wb322.entity.Template;
 import org.junit.Test;
@@ -187,8 +189,8 @@ public class TemplateUtil {
 
     /**
      * 复制文件
-     * @param source
-     * @param target
+     * @param source 要复制的文件
+     * @param target 复制到此文件夹
      * @param type inner:复制到tartget内,其它:复制到tartget同级目录
      * @param isCopy 是否复制
      * @return
@@ -220,6 +222,6 @@ public class TemplateUtil {
 
     @Test
     public void aaa(){
-        File file = FileUtil.touch ("C:\\Users\\20688\\Desktop\\aaa\\bbb");
+
     }
 }

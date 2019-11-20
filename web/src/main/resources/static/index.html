@@ -7,12 +7,14 @@
     <link rel="stylesheet" href="/layui/css/layui.css">
     <script charset="utf-8" src="/layui/layui.js"></script>
 
-
     <script charset="utf-8" src="/jquery.min.js"></script>
     <script charset="utf-8" src="/myFun.js"></script>
     <script charset="utf-8" src="/ztree/jquery.ztree.core.js"></script>
     <script charset="utf-8" src="/ztree/jquery.ztree.excheck.js"></script>
     <script charset="utf-8" src="/ztree/jquery.ztree.exedit.js"></script>
+    <script charset="utf-8" src="/tables.js"></script>
+    <script charset="utf-8" src="/templates.js"></script>
+    <script charset="utf-8" src="/settings.js"></script>
     <style>
         body {
             padding: 20px;
@@ -22,12 +24,30 @@
 <body>
 <div class="layui-tab layui-tab-card" lay-filter="tab">
     <ul class="layui-tab-title">
-        <li lay-id="configs" class="layui-this">配置</li>
-        <li lay-id="tables">表</li>
+        <li lay-id="tables" class="layui-this">表</li>
         <li lay-id="templates">模板</li>
+        <li lay-id="settings">配置</li>
     </ul>
     <div class="layui-tab-content">
-        <div class="layui-tab-item layui-show"></div>
+        <div class="layui-tab-item layui-show">
+            <table class="layui-table" lay-data="{url:'/tables',title:'表',page:true,toolbar: '#toolbar',id:'test'}"
+                   lay-filter="t-table">
+                <thead>
+                <th lay-data="{type:'checkbox'}">选中</th>
+                <th lay-data="{field:'name',}">表名</th>
+                <th lay-data="{field:'pkey',}">主键</th>
+                <th lay-data="{field:'pkeyType',}">主键类型</th>
+                <th lay-data="{field:'engine',}">引擎</th>
+                <th lay-data="{field:'comment',}">表注释</th>
+                <th lay-data="{field:'createTime',}">创建时间</th>
+                </thead>
+            </table>
+        </div>
+        <div class="layui-tab-item">
+            <table class="layui-table" lay-filter="t-settings" id="t-settings">
+
+            </table>
+        </div>
         <div class="layui-tab-item">
             <div class="layui-row">
                 <div class="layui-col-md6">
@@ -47,7 +67,6 @@
                             <div class="layui-inline layui-btn-group" style="padding-top: 20px">
                                 <button class="layui-btn layui-btn-sm" onclick="expandTree()"><span
                                         id="tree-text">展开树</span></button>
-                                <button class="layui-btn layui-btn-sm" onclick="submitTree()">提交修改</button>
                             </div>
 
                         </div>
@@ -72,251 +91,13 @@
                 </div>
             </div>
         </div>
-        <div class="layui-tab-item">
-            <table class="layui-table" lay-data="{url:'/tables',title:'表',page:true,toolbar: '#toolbar',id:'test'}"
-                   lay-filter="t-table">
-                <thead>
-                <th lay-data="{type:'checkbox'}">选中</th>
-                <th lay-data="{field:'name',}">表名</th>
-                <th lay-data="{field:'pkey',}">主键</th>
-                <th lay-data="{field:'pkeyType',}">主键类型</th>
-                <th lay-data="{field:'engine',}">引擎</th>
-                <th lay-data="{field:'comment',}">表注释</th>
-                <th lay-data="{field:'createTime',}">创建时间</th>
-                </thead>
-            </table>
-        </div>
     </div>
 </div>
 </body>
 <script type="text/html" id="toolbar">
-    <button class="layui-btn" onclick="xadmin.open('添加','/index/users/add',500,450)"><i class="layui-icon"></i>添加
-    </button>
+    <button class="layui-btn" onclick="wb.open('生成','../generator.html',500,450)">生成</button>
 </script>
 <script>
-    layui.use(['table', 'layer', 'form', 'element', 'code'], function () {
-        var table = layui.table;
-        var layer = layui.layer;
-        var form = layui.form;
-        var element = layui.element;
 
-        //监听Tab切换，以改变地址hash值
-        element.on('tab(test1)', function () {
-            location.hash = 'tab' + this.getAttribute('lay-id');
-        });
-        //添加按钮点击事件
-        $("#tpl-add-btn").click(function () {
-            if ($("#tpl-input-add").val() == '') {
-                layer.msg("请填写模板名称");
-                return;
-            }
-            var name = $("#tpl-input-add").val();
-            wb.post("/templates/addOrCopy", {url: name}, function (d) {
-                if (d.code == 0) {
-                    $.fn.zTree.destroy("t-tree-add");
-                    $.fn.zTree.init($("#t-tree-add"), setting, d.data);
-                } else {
-                    layer.msg(d.msg);
-                }
-            });
-        });
-        //ztree设置
-        var setting = {
-            view: {
-                addHoverDom: addHoverDom,
-                removeHoverDom: removeHoverDom,
-                selectedMulti: true,
-                dblClickExpand: false,
-            },
-            check: {
-                enable: false
-            },
-            data: {
-                simpleData: {
-                    enable: true
-                },
-                keep: {
-                    parent: true
-                },
-            },
-            edit: {
-                drag: {},
-                enable: true,
-                removeTitle: "删除",
-                renameTitle: "重命名"
-            },
-            callback: {
-                onDblClick: zTreeOnDblClick,
-                beforeRename: zTreeBeforeRename,
-                beforeRemove: zTreeBeforeRemove,
-                beforeDrag: zTreeBeforeDrag,
-                beforeDrop: zTreeBeforeDrop
-            }
-        };
-        //查询所有模板
-        wb.get("/templates", null, function (d) {
-            d.data.forEach(function (k) {
-                $("#tpl-sel").append("<option value='" + k.name + "'>" + k.name + "</option>");
-                form.render();
-            });
-        });
-        //监听select切换模板
-        form.on('select(tpl-sel)', function (data) {
-            $.fn.zTree.destroy("t-tree");
-            wb.get("/templates/detail", {name: data.value}, function (d) {
-                $.fn.zTree.init($("#t-tree"), setting, d.data);
-            });
-        });
-
-        //ztree双击事件
-        function zTreeOnDblClick(event, treeId, treeNode) {
-            var url = getParentsPath(treeNode);
-            $.get("/templates/content", {url: url});
-            return;
-        };
-
-        //ztree修改名称
-        function zTreeBeforeRename(treeId, treeNode, newName, isCancel) {
-            if (isCancel) {
-                return;
-            }
-            var r = false;
-            wb.put("/templates", {url: getParentsPath(treeNode), newName: newName}, function (d) {
-                if (d.code == 0) {
-                    r = true;
-                } else {
-                    layer.msg(d.msg);
-                }
-            }, {async: false});
-            return true;
-        }
-
-        //ztree删除节点
-        function zTreeBeforeRemove(treeId, treeNode) {
-            var b = false;
-            var url = getParentsPath(treeNode);
-            wb.delete("/templates", {url: url}, function (d) {
-                if (d.code == 0) {
-                    b = true;
-                } else {
-                    layer.msg(d.msg);
-                }
-            }, {async: false});
-            return b;
-        }
-
-        //ztree拖拽前事件
-        function zTreeBeforeDrag(treeId, treeNodes) {
-            source_treeId = treeId;
-            return true;
-        };
-
-        //ztree拖拽事件
-        var source_treeId;
-        function zTreeBeforeDrop(treeId, treeNodes, targetNode, moveType, isCopy) {
-            var b = false;
-            if (source_treeId != treeId && !isCopy) {
-                layer.msg("不同模板间的文件只能复制");
-                return b;
-            }
-            var target = getParentsPath(targetNode);
-            var source = [];
-            treeNodes.forEach(function (v) {
-                source.push(getParentsPath(v));
-            });
-            wb.post("/templates/drop", {source: source, target: target, type: moveType, isCopy: isCopy}, function (d) {
-                if (d.code == 0) {
-                    b = true;
-                } else {
-                    layer.msg(d.msg);
-                }
-            },{traditional:true,async:false})
-            return b;
-        };
-    });
-
-    //获取任意文件的相对路径
-    function getParentsPath(treeNode) {
-        var parent = treeNode.getParentNode();
-        if (parent == null) {
-            return treeNode.name;
-        } else {
-            return getParentsPath(parent) + "\\" + treeNode.name;
-        }
-    }
-
-    //展开树/收缩树
-    function expandTree() {
-        var treeObj = $.fn.zTree.getZTreeObj("t-tree");
-        if ($("#tree-text").text() == '展开树') {
-            $("#tree-text").text('收缩树');
-            treeObj.expandAll(true);
-        } else {
-            $("#tree-text").text('展开树');
-            treeObj.expandAll(false);
-        }
-    }
-
-    var newCount = 1;
-
-    //ztree节点添加文件和文件夹按钮
-    function addHoverDom(treeId, treeNode) {
-        //只有父节点才有添加功能
-        if (!treeNode.isParent) {
-            return;
-        }
-        var sObj = $("#" + treeNode.tId + "_span");
-        if (treeNode.editNameFlag || $("#addBtn_" + treeNode.tId).length > 0) return;
-        if (treeNode.editNameFlag || $("#addBtn2_" + treeNode.tId).length > 0) return;
-        var addStr = "<span class='layui-icon layui-icon-templeate-1' id='addBtn_" + treeNode.tId
-            + "' title='添加文件夹' onfocus='this.blur();'></span>";
-        var addStr2 = "<span class='layui-icon layui-icon-file' id='addBtn2_" + treeNode.tId
-            + "' title='添加文件' onfocus='this.blur();'></span>";
-        sObj.after(addStr2);
-        sObj.after(addStr);
-        var btn = $("#addBtn_" + treeNode.tId);
-        var btn2 = $("#addBtn2_" + treeNode.tId);
-        if (btn) btn.bind("click", function () {
-            var name = "new folder" + (newCount++);
-            var url = getParentsPath(treeNode) + "\\" + name;
-            wb.post("/templates", {type: 0, url: url}, function (d) {
-                if (d.code == 0) {
-                    var zTree = $.fn.zTree.getZTreeObj(treeId);
-                    zTree.addNodes(treeNode, 0, {id: (-1 - newCount), isParent: true, pId: treeNode.id, name: name});
-                } else {
-                    layer.msg(d.msg);
-                }
-            }, {async: false});
-            return false;
-        });
-        if (btn2) btn2.bind("click", function () {
-            var name = "new file" + (newCount++);
-            var url = getParentsPath(treeNode) + "\\" + name;
-            wb.post("/templates", {type: 1, url: url}, function (d) {
-                if (d.code == 0) {
-                    var zTree = $.fn.zTree.getZTreeObj(treeId);
-                    zTree.addNodes(treeNode, 0, {id: (-1 - newCount), pId: treeNode.id, name: name});
-                } else {
-                    layer.msg(d.msg);
-                }
-            }, {async: false});
-            return false;
-        });
-    };
-
-    //移除节点按钮
-    function removeHoverDom(treeId, treeNode) {
-        $("#addBtn_" + treeNode.tId).unbind().remove();
-        $("#addBtn2_" + treeNode.tId).unbind().remove();
-    };
-
-    //提交tree修改
-    function submitTree() {
-        var treeObj = $.fn.zTree.getZTreeObj("t-tree");
-        var node = treeObj.getNodeByTId("t-tree_3");
-        var json = treeObj.transformToArray(node);
-        console.info(json);
-        //wb.post("/templates",nodes);
-    }
 </script>
 </html>

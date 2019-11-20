@@ -23,5 +23,9 @@ public class Strategy {
      * 模板路径
      */
     public static final String templatesPath = projectPath + File.separator + "templates" + File.separator;
+    /**
+     * 配置文件路径
+     */
+    public static final String settingsPath = projectPath + File.separator + "global-config.setting";
 
 }
