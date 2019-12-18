@@ -1,6 +1,7 @@
 package com.github.wb322.controller;
 
 import com.github.wb322.service.TableService;
+import com.github.wb322.tools.GeneratorUtil;
 import com.github.wb322.tools.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +26,11 @@ public class TableController {
     }
     @PostMapping
     public Result generator(String template){
+        try {
+            GeneratorUtil.startGenerator ();
+        } catch (Exception e) {
+            e.printStackTrace ();
+        }
         return null;
     }
 }

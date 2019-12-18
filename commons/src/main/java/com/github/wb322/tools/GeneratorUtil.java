@@ -16,8 +16,7 @@ import java.util.List;
  */
 public class GeneratorUtil {
 
-    @Test
-    public void startGenerator()throws Exception{
+    public static void startGenerator()throws Exception{
         String name = Strategy.templatesPath + "SpringBoot单模块+layuiadmin";
         String path = "com.github.test";
         File templateDir = new File (name);
@@ -37,7 +36,7 @@ public class GeneratorUtil {
      * @param tables
      * @throws Exception
      */
-    private void copyFile(File src, File dest, boolean isOverride,List<Table> tables)throws Exception{
+    private static void copyFile(File src, File dest, boolean isOverride,List<Table> tables)throws Exception{
         boolean b = false;
         if (src.isDirectory ()){
             if (src.getName ().contains ("[Table2]")){
@@ -46,7 +45,6 @@ public class GeneratorUtil {
             File[] files = src.listFiles ();
             if (ArrayUtil.isNotEmpty (files)){
                 notEmptyDir(files,dest,b,isOverride,tables);
-
             }else{
                 emptyDir(dest,b,tables);
             }
@@ -67,7 +65,7 @@ public class GeneratorUtil {
      * @param tables
      * @throws Exception
      */
-    private void notEmptyDir(File[] files, File dest, boolean b, boolean isOverride, List<Table> tables)throws Exception {
+    private static void notEmptyDir(File[] files, File dest, boolean b, boolean isOverride, List<Table> tables)throws Exception {
         if (b){
             for (Table table : tables) {
                 File oldDir = new File (dest.getAbsolutePath ().replace ("[Table2]", table.getCamel_name ()));
@@ -90,7 +88,7 @@ public class GeneratorUtil {
      * @param b
      * @param tables
      */
-    private void emptyDir(File dest, boolean b, List<Table> tables) {
+    private static void emptyDir(File dest, boolean b, List<Table> tables) {
         if (b){
             for (Table table : tables) {
                 FileUtil.mkdir (dest.getAbsolutePath ().replace ("[Table2]",table.getCamel_name ()));
@@ -107,7 +105,7 @@ public class GeneratorUtil {
      * @param b
      * @param tables
      */
-    private void writeContent(File src, File dest, boolean isOverride, boolean b, List<Table> tables) {
+    private static void writeContent(File src, File dest, boolean isOverride, boolean b, List<Table> tables) {
         if (b){
             for (Table table : tables) {
                 File file = FileUtil.copy (src, dest, isOverride);
